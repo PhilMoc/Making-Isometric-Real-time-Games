@@ -1,3 +1,24 @@
+//Map class
+function Map(gridSizeW, gridSizeH)
+{
+	// Tile texture
+	this.tile = new Image();
+	this.tile.src = "../img/tile.png";
+
+	// Grid dimensions
+	this.grid = {
+		width: gridSizeW,
+		height: gridSizeH
+	}
+
+	// Tile map matrix
+	this.tileMap = [];
+
+	//Building texture
+	this.building = new Image();
+	this.building.src = "../img/icecream.png";
+}
+
 // Game class for example 14
 function Game(canvas, game, gridSizeW, gridSizeH) {
 	this.started = true;
@@ -21,24 +42,16 @@ function Game(canvas, game, gridSizeW, gridSizeH) {
 		}
 	}
 
+	//Create a map
+	this.map = new Map(gridSizeW, gridSizeH);
+	
+
 	if (missingDeps.length !== 0) {
 		alert("This browser doesn't include some of the technologies needed to play the game");
 		this.started = false;
 		return;
 	}
 
-	// Tile texture
-	this.tile = new Image();
-	this.tile.src = "../img/tile.png";
-
-	// Grid dimensions
-	this.grid = {
-		width: gridSizeW,
-		height: gridSizeH
-	}
-
-	// Tile map matrix
-	this.tileMap = [];
 
 	// Drag helper
 	this.dragHelper = {
@@ -58,13 +71,14 @@ function Game(canvas, game, gridSizeW, gridSizeH) {
 	// Scroll position helper, keeps track of scrolling
 	this.scrollPosition = { x: 0, y: 0 }
 
+
 	// Default zoom level
-	this.tile.width *= this.zoomHelper.level;
-	this.tile.height *= this.zoomHelper.level;
+	this.map.tile.width *= this.zoomHelper.level;
+	this.map.tile.height *= this.zoomHelper.level;
 
 	// Initially center the starting point horizontally and vertically
-	this.scrollPosition.y -= (this.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
-	this.scrollPosition.x -= (this.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
+	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+	this.scrollPosition.x -= (this.map.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
 
 	this.doResize();
 	this.draw();
@@ -174,9 +188,6 @@ Game.prototype.handleMouseDown = function(e) {
 	}
 
 	switch (Tools.current) {
-		case Tools.BUILD:
-            
-			break;
 		case Tools.MOVE:
 			this.dragHelper.active = true;
 			this.dragHelper.x = x;
@@ -189,17 +200,24 @@ Game.prototype.handleMouseDown = function(e) {
 			this.zoomOut();
 			break;
 		case Tools.DEMOLISH:
-			
+
 			var pos = this.translatePixelsToMatrix(x, y);
 
-			if (this.tileMap[pos.row] != undefined && this.tileMap[pos.row][pos.col] != undefined) {
-				this.tileMap[pos.row][pos.col] = null;
+			if (this.map.tileMap[pos.row] != undefined && this.map.tileMap[pos.row][pos.col] != undefined) {
+				this.map.tileMap[pos.row][pos.col] = null;
 			}
 
 			break;
+		case Tools.BUILD:
+			var pos = this.translatePixelsToMatrix(x, y);
+			this.map.tileMap[pos.row] = (this.map.tileMap[pos.row] === undefined) ? [] : this.map.tileMap[pos.row];
+			this.map.tileMap[pos.row][pos.col] = 1;
+			break;
+		
 	}
-    
-    this.draw();
+
+	
+    	this.draw();
 }
 
 Game.prototype.doResize = function() {
@@ -209,11 +227,11 @@ Game.prototype.doResize = function() {
 }
 
 Game.prototype.translatePixelsToMatrix = function(x, y) {
-	var tileHeight = this.tile.height * this.zoomHelper.level;
-	var tileWidth = this.tile.width * this.zoomHelper.level;
+	var tileHeight = this.map.tile.height * this.zoomHelper.level;
+	var tileWidth = this.map.tile.width * this.zoomHelper.level;
 
-	var gridOffsetY = (this.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
-	var gridOffsetX = (this.grid.width * this.zoomHelper.level);
+	var gridOffsetY = (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+	var gridOffsetX = (this.map.grid.width * this.zoomHelper.level);
 
 	// By default the grid appears centered horizontally
 	gridOffsetX += (this.canvas.width / 2) - ((tileWidth / 2) * this.zoomHelper.level) + this.scrollPosition.x;
@@ -253,28 +271,39 @@ Game.prototype.draw = function(srcX, srcY, destX, destY) {
 	startRow = (startRow < 0) ? 0 : startRow;
 	startCol = (startCol < 0) ? 0 : startCol;
 
-	rowCount = (rowCount > this.grid.width) ? this.grid.width : rowCount;
-	colCount = (colCount > this.grid.height) ? this.grid.height : colCount;
+	rowCount = (rowCount > this.map.grid.width) ? this.map.grid.width : rowCount;
+	colCount = (colCount > this.map.grid.height) ? this.map.grid.height : colCount;
 
-	var tileHeight = this.tile.height * this.zoomHelper.level;
-	var tileWidth = this.tile.width * this.zoomHelper.level;
+	var tileHeight = this.map.tile.height * this.zoomHelper.level;
+	var tileWidth = this.map.tile.width * this.zoomHelper.level;
 
 	for (var row = startRow; row < rowCount; row++) {
 		for (var col = startCol; col < colCount; col++) {
-			var xpos = (row - col) * tileHeight + (this.grid.width * this.zoomHelper.level);
+			var xpos = (row - col) * tileHeight + (this.map.grid.width * this.zoomHelper.level);
 			xpos += (this.canvas.width / 2) - ((tileWidth / 2) * this.zoomHelper.level) + this.scrollPosition.x;
 
-			var ypos = (row + col) * (tileHeight / 2) + (this.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
-
-			if (this.tileMap[row] != null && this.tileMap[row][col] != null) {
+			var ypos = (row + col) * (tileHeight / 2) + (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+			
+			if (this.map.tileMap[row] != undefined && this.map.tileMap[row][col] != undefined) 
+			{
 				// Place building
-			} else {
 				if (Math.round(xpos) + tileWidth >= srcX &&
 					Math.round(ypos) + tileHeight >= srcY &&
 					Math.round(xpos) <= destX &&
-					Math.round(ypos) <= destY) {
+					Math.round(ypos) <= destY) 
+				{
+					this.c.drawImage(this.map.building, Math.round(xpos), Math.round(ypos), tileWidth, tileHeight);	
+				}
+			} 
+			else 
+			{
+				if (Math.round(xpos) + tileWidth >= srcX &&
+					Math.round(ypos) + tileHeight >= srcY &&
+					Math.round(xpos) <= destX &&
+					Math.round(ypos) <= destY) 
+				{
 
-					this.c.drawImage(this.tile, Math.round(xpos), Math.round(ypos), tileWidth, tileHeight);	
+					this.c.drawImage(this.map.tile, Math.round(xpos), Math.round(ypos), tileWidth, tileHeight);	
 
 				}
 			}
@@ -296,8 +325,8 @@ Game.prototype.zoomIn = function() {
 	}
 
 	// Center the view
-	this.scrollPosition.y -= (this.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
-	this.scrollPosition.x -= (this.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
+	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+	this.scrollPosition.x -= (this.map.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
 }
 
 Game.prototype.zoomOut = function() {
@@ -313,15 +342,15 @@ Game.prototype.zoomOut = function() {
 	}
 
 	// Center the view
-	this.scrollPosition.y -= (this.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
-	this.scrollPosition.x -= (this.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
+	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+	this.scrollPosition.x -= (this.map.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
 }
 
 Game.prototype.rotateGrid = function(mW, mH, sW, sH) {
     var m = [];
 
-    mW = (mW === undefined) ? this.grid.width : mW;
-    mH = (mH === undefined) ? this.grid.height : mH;
+    mW = (mW === undefined) ? this.map.grid.width : mW;
+    mH = (mH === undefined) ? this.map.grid.height : mH;
 
     sW = (sW === undefined) ? 0 : sW;
     sH = (sH === undefined) ? 0 : sH;
@@ -330,12 +359,12 @@ Game.prototype.rotateGrid = function(mW, mH, sW, sH) {
         for (var j = sH; j < mH; j++) {
         	var row = (mW - j) - 1;
 
-        	if (this.tileMap[row] !== undefined && this.tileMap[row][i]) {
+        	if (this.map.tileMap[row] !== undefined && this.map.tileMap[row][i]) {
         		m[i] = (m[i] === undefined) ? [] : m[i];
-        		m[i][j] = this.tileMap[row][i];
+        		m[i][j] = this.map.tileMap[row][i];
         	}
         }
     }
 
-    this.tileMap = m;
+    this.map.tileMap = m;
 }

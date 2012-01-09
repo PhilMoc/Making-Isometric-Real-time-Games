@@ -21,6 +21,19 @@
 		<link rel="stylesheet" href="ui-style.css" />
 		<script src="../utils/modernizr-1.7.min.js" charset="utf-8"></script>
 		<script src="game-ex14.js" charset="utf-8"></script>
+
+		//uncomment to use interface.js
+		//<script src="interface.js" charset=utf-8"></script>
+		//<script>
+			//window.onload = function () 
+			//{
+			//	var canvas = document.getElementById("gameCanvas");
+			//	var game = document.getElementById("game")
+			//	var interface = new Interface(game, canvas, 
+			//			document, new Game(canvas, game, 500, 500));
+			//}	
+		//</script>
+
 		<script>
 
 			// Enums
@@ -121,12 +134,17 @@
 						case 'demolish':
 							selectTool(Tools.DEMOLISH, document.getElementById('demolish'));
 							break;
+						case 'building1':
+						case 'building2':
+						case 'building3':
+							Tools.current = Tools.BUILD;
+							break;
 						default:
 							// He didn't click on any option and actually click on an empty section of the UI, fallback to the canvas.
 							e.srcElement = canvas;
 							e.target = canvas;
 							e.toElement = canvas;
-							
+
 							g.handleMouseDown(e);
 
 							break;
@@ -188,31 +206,33 @@
 					<a href="javascript:void(0)" id="panel-toggle">Build</a>
 					<div id="panel">
 						<h3>Choose a building:</h3>
-						<ul id="buildings">
+						<ul id="buildings">		
+							
 							<li>
-								<h2>Building Name</h2>
-								<p>
+								<h2 id="building1">Building Name</h2>
+								<p id="building1">
 									Description
 									<br />
-									<span>$Cost</span>
+									<span id="building1">$Cost</span>
 								</p>
 							</li>
-
+							
+							
 							<li>
-								<h2>Building Name</h2>
-								<p>
+								<h2 id="building2">Building Name</h2>
+								<p id="building2">
 									Description
 									<br />
-									<span>$Cost</span>
+									<span id="building2">$Cost</span>
 								</p>
 							</li>
-
+				
 							<li>
-								<h2>Building Name</h2>
-								<p>
+								<h2 id="building3">Building Name</h2>
+								<p id="building3">
 									Description
 									<br />
-									<span>$Cost</span>
+									<span id="building3">$Cost</span>
 								</p>
 							</li>
 						</ul>

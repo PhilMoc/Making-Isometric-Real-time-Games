@@ -138,7 +138,7 @@ Game.prototype.handleKeyDown = function(e) {
 	this.draw();
 }
 
-Game.prototype.handleDrag = function(e) {
+Game.prototype.handleDrag = function(e, Tools) {
 	e.preventDefault();
 
 	switch (Tools.current) {
@@ -164,7 +164,7 @@ Game.prototype.handleDrag = function(e) {
 	}
 }
 
-Game.prototype.handleMouseUp = function(e) {
+Game.prototype.handleMouseUp = function(e, Tools) {
 	e.preventDefault();
 
 	switch (Tools.current) {
@@ -174,11 +174,11 @@ Game.prototype.handleMouseUp = function(e) {
 	}
 }
 
-Game.prototype.handleMouseDown = function(e) {
+Game.prototype.handleMouseDown = function(e, Tools) {
 	var x, y;
 
 	e.preventDefault();
-
+	
 	if (Modernizr.touch) {
 		x = e.touches[0].pageX;
 		y = e.touches[0].pageY;
@@ -192,6 +192,7 @@ Game.prototype.handleMouseDown = function(e) {
 			this.dragHelper.active = true;
 			this.dragHelper.x = x;
 			this.dragHelper.y = y;
+			this.draw();
 			break;
 		case Tools.ZOOM_IN:
 			this.zoomIn();
@@ -206,18 +207,16 @@ Game.prototype.handleMouseDown = function(e) {
 			if (this.map.tileMap[pos.row] != undefined && this.map.tileMap[pos.row][pos.col] != undefined) {
 				this.map.tileMap[pos.row][pos.col] = null;
 			}
-
+			this.draw();
 			break;
 		case Tools.BUILD:
 			var pos = this.translatePixelsToMatrix(x, y);
 			this.map.tileMap[pos.row] = (this.map.tileMap[pos.row] === undefined) ? [] : this.map.tileMap[pos.row];
 			this.map.tileMap[pos.row][pos.col] = 1;
+			this.draw();
 			break;
 		
 	}
-
-	
-    	this.draw();
 }
 
 Game.prototype.doResize = function() {
@@ -323,10 +322,13 @@ Game.prototype.zoomIn = function() {
 		case this.zoomHelper.CLOSE:
 			return;
 	}
+	
 
 	// Center the view
-	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
+	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;		
 	this.scrollPosition.x -= (this.map.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
+
+	this.draw();
 }
 
 Game.prototype.zoomOut = function() {
@@ -344,6 +346,8 @@ Game.prototype.zoomOut = function() {
 	// Center the view
 	this.scrollPosition.y -= (this.map.grid.height * this.zoomHelper.level) + this.scrollPosition.y;
 	this.scrollPosition.x -= (this.map.grid.width * this.zoomHelper.level) + this.scrollPosition.x;
+
+	this.draw();
 }
 
 Game.prototype.rotateGrid = function(mW, mH, sW, sH) {

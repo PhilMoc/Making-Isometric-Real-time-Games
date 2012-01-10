@@ -24,10 +24,12 @@
 				DEMOLISH: 3,
 				SELECT: 4,
 				BUILD: 5
-			}
+			}		
+
 
 				this.canvas = cnvs;
 				this.game = gm;
+
 
 				// Initialize the game object
 				this.g = gmObj;
@@ -46,28 +48,30 @@
 
 				// Set up the event listeners
 				window.addEventListener('resize', function() { this.g.doResize(); }, false);
-				this.canvas.addEventListener(this.pointer.DOWN, function(e) {this.g.handleMouseDown(e); }, false);
-				this.canvas.addEventListener(this.pointer.MOVE, function(e) { this.g.handleDrag(e); }, false);
-				document.body.addEventListener(this.pointer.UP, function(e) { this.g.handleMouseUp(e); }, false);
-				
+				this.canvas.addEventListener(this.pointer.DOWN, function(e) { this.g.handleMouseDown(e, this.Tools); }.bind(this), false);
+				this.canvas.addEventListener(this.pointer.MOVE, function(e) { this.g.handleDrag(e, this.Tools); }.bind(this), false);
+				document.body.addEventListener(this.pointer.UP, function(e) { this.g.handleMouseUp(e, this.Tools); }.bind(this), false);
+
+
 				//alert(window);
 
 				if (Modernizr.touch){
 					// Detect gestures
-					document.body.addEventListener('gestureend', function(e) { this.g.handleGestureEnd(e); }, false);
+					document.body.addEventListener('gestureend', function(e) { this.g.handleGestureEnd(e); }.bind(this), false);
 				} else {
-					document.body.addEventListener('keydown', function(e) { this.g.handleKeyDown(e); }, false);
+					document.body.addEventListener('keydown', function(e) { this.g.handleKeyDown(e); }.bind(this), false);
 
 					// Detect mousewheel scrolling
-					document.body.addEventListener('mousewheel', function(e) { this.g.handleScroll(e); }, false);
-					document.body.addEventListener('DOMMouseScroll', function(e) { this.g.handleScroll(e); }, false);
+					document.body.addEventListener('mousewheel', function(e) { this.g.handleScroll(e); }.bind(this), false);
+					document.body.addEventListener('DOMMouseScroll', function(e) { this.g.handleScroll(e); }.bind(this), false);
 				}
 
 				
 
 				// Listen for GUI events
 				var ui = document.getElementById('ui');
-				ui.addEventListener(pointer.UP, function(e) {
+				//ui.addEventListener(this.pointer.DOWN, function(e){alert("EVENTLISTENERS WHEEEEEEE");}.bind(this), false);
+				ui.addEventListener(this.pointer.UP, function(e) {
 					switch(e.target.getAttribute('id')) {
 						case 'panel-toggle':
 							var panelContainer = document.getElementById('panel-container');
@@ -88,7 +92,7 @@
 							this.selectTool(this.Tools.MOVE, document.getElementById('move'));
 							break;
 						case 'zoomIn':
-							this.selectTool(this.this.Tools.ZOOM_IN, document.getElementById('zoomIn'));
+							this.selectTool(this.Tools.ZOOM_IN, document.getElementById('zoomIn'));
 							break;
 						case 'zoomOut':
 							this.selectTool(this.Tools.ZOOM_OUT, document.getElementById('zoomOut'));
@@ -115,15 +119,21 @@
 
 							break;
 					}
-				}, false);
-			}
+				}.bind(this), false);
 }
 			
-
+//Credit to Robert Sosinski for scope binding function - http://www.robertsosinski.com/2009/04/28/binding-scope-in-javascript/
+Function.prototype.bind = function(scope) {
+  var _function = this;
+  
+  return function() {
+    return _function.apply(scope, arguments);
+  }
+}
 
 Interface.prototype.selectTool = function(tool, elem) {
 				
-				alert("In select tool");				
+				//alert(this.Tools.current);				
 
 				// Remove the "active" class from any element inside the div#tools ul
 				for (var i = 0, x = elem.parentNode.childNodes.length; i < x; i++) {
@@ -133,25 +143,26 @@ Interface.prototype.selectTool = function(tool, elem) {
 				}
 
 				elem.className += "active";
-
-				alert(tool);				
+			
 
 				switch(tool) {
-					case Tools.SELECT:
+					case this.Tools.SELECT:
 						this.Tools.current = this.Tools.SELECT;
 						break;
-					case Tools.MOVE:
+					case this.Tools.MOVE:
 						this.Tools.current = this.Tools.MOVE;
 						break;
-					case Tools.ZOOM_IN:
+					case this.Tools.ZOOM_IN:
 						this.Tools.current = this.Tools.ZOOM_IN;
 						break;
-					case Tools.ZOOM_OUT:
+					case this.Tools.ZOOM_OUT:
 						this.Tools.current = this.Tools.ZOOM_OUT;
 						break;
-					case Tools.DEMOLISH:
+					case this.Tools.DEMOLISH:
 						this.Tools.current = this.Tools.DEMOLISH;
 						break;
 				}
+
+				//alert(this.Tools.current);
 
 			}

@@ -45,12 +45,14 @@
 					this.pointer.UP = 'touchend';
 					this.pointer.MOVE = 'touchmove';
 				}
+				
+				
 
 				// Set up the event listeners
-				window.addEventListener('resize', function() { this.g.doResize(); }, false);
-				this.canvas.addEventListener(this.pointer.DOWN, function(e) { this.g.handleMouseDown(e, this.Tools); }.bind(this), false);
-				this.canvas.addEventListener(this.pointer.MOVE, function(e) { this.g.handleDrag(e, this.Tools); }.bind(this), false);
-				document.body.addEventListener(this.pointer.UP, function(e) { this.g.handleMouseUp(e, this.Tools); }.bind(this), false);
+				$(window).resize(function() { this.g.doResize(); }.bind(this));
+				$(this.canvas).mousedown(function(e) {this.g.handleMouseDown(e, this.Tools);}.bind(this));
+				$(this.canvas).mousemove(function(e) { this.g.handleDrag(e, this.Tools); }.bind(this));
+				$(document.body).mouseup(function(e) { this.g.handleMouseUp(e, this.Tools); }.bind(this));
 
 
 				//alert(window);
@@ -62,7 +64,7 @@
 					document.body.addEventListener('keydown', function(e) { this.g.handleKeyDown(e); }.bind(this), false);
 
 					// Detect mousewheel scrolling
-					document.body.addEventListener('mousewheel', function(e) { this.g.handleScroll(e); }.bind(this), false);
+					$(document.body).mousewheel(function(e, delta) { this.g.handleScroll(e, delta); }.bind(this));
 					document.body.addEventListener('DOMMouseScroll', function(e) { this.g.handleScroll(e); }.bind(this), false);
 				}
 
@@ -71,7 +73,7 @@
 				// Listen for GUI events
 				var ui = document.getElementById('ui');
 				//ui.addEventListener(this.pointer.DOWN, function(e){alert("EVENTLISTENERS WHEEEEEEE");}.bind(this), false);
-				ui.addEventListener(this.pointer.UP, function(e) {
+				$(ui).mouseup(function(e) {
 					switch(e.target.getAttribute('id')) {
 						case 'panel-toggle':
 							var panelContainer = document.getElementById('panel-container');
@@ -119,7 +121,7 @@
 
 							break;
 					}
-				}.bind(this), false);
+				}.bind(this));
 }
 			
 //Credit to Robert Sosinski for scope binding function - http://www.robertsosinski.com/2009/04/28/binding-scope-in-javascript/

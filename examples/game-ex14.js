@@ -94,10 +94,10 @@ Game.prototype.handleGestureEnd = function(e) {
 	}
 }
 
-Game.prototype.handleScroll = function(e) {
+Game.prototype.handleScroll = function(e, delta) {
 	e.preventDefault();
 
-	var scrollValue = (e.wheelDelta == undefined) ? e.detail * -1 : e.wheelDelta;
+	var scrollValue = (delta == undefined) ? delta * -1 : delta;
 
 	if (scrollValue >= 0) {
 		this.zoomIn();
@@ -176,7 +176,6 @@ Game.prototype.handleMouseUp = function(e, Tools) {
 
 Game.prototype.handleMouseDown = function(e, Tools) {
 	var x, y;
-
 	e.preventDefault();
 	
 	if (Modernizr.touch) {
